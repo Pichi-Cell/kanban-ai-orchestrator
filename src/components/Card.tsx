@@ -10,12 +10,11 @@ export const Card = memo(({ task, index, columnId }: { task: Task, index: number
         e.dataTransfer.effectAllowed = "move";
     };
 
-
     return (
         <div
             draggable="true"
             onDragStart={handleDragStart}
-            className="bg-white p-3 mb-2 rounded shadow-sm">
+            className="bg-white p-3 mb-2 rounded shadow-sm kanban-card">
             {task.content}
         </div>
     );

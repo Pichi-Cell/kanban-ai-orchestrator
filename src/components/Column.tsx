@@ -10,15 +10,14 @@ export const Column = memo(({ column, columnTasks, moveTask }: { column: ColumnT
         const taskId = e.dataTransfer.getData("taskId");
         const sourceColId = e.dataTransfer.getData("sourceColId")
         const cardElements = Array.from(e.currentTarget.querySelectorAll('.kanban-card'));
-
         // 2. Find the index of the first card whose middle is below the mouse
         const dropIndex = cardElements.findIndex(el => {
             const rect = el.getBoundingClientRect();
+            console.log("rect", rect)
             const midPoint = rect.top + rect.height / 2;
+            console.log(midPoint, "midpoint")
             return e.clientY < midPoint;
         });
-
-        console.log(dropIndex)
         // 3. If no cards are below, it goes to the end (-1 becomes length)
         const finalIndex = dropIndex === -1 ? columnTasks.length : dropIndex;
 
