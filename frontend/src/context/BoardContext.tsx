@@ -18,10 +18,13 @@ export const BoardProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             'task-3': { id: 'task-3', content: 'Setup Vite + Tailwind' },
         },
         columns: {
-            'col-1': { id: 'col-1', title: 'To Do', taskIds: ['task-1', 'task-2'] },
-            'col-2': { id: 'col-2', title: 'Done', taskIds: ['task-3'] },
+            'col-1': { id: 'col-1', title: 'Backlog', taskIds: ['task-1', 'task-2', 'task-3'] },
+            'col-2': { id: 'col-2', title: 'To Do', taskIds: [] },
+            'col-3': { id: 'col-3', title: 'In progress', taskIds: [] },
+            'col-4': { id: 'col-4', title: 'Awaiting Review', taskIds: [] },
+            'col-5': { id: 'col-5', title: 'Done', taskIds: [] },
         },
-        columnOrder: ['col-1', 'col-2'],
+        columnOrder: ['col-1', 'col-2', 'col-3', 'col-4', 'col-5'],
     });
 
     const updateTask = useCallback((taskId: string, newContent: string) => {
