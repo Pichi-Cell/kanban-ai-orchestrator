@@ -1,33 +1,15 @@
 import { memo } from 'react';
 import { Card } from './Card';
 import { Task, Column as ColumnType } from '../types/kanban';
+import { handleColumnDrop } from '../utils/boardHandlers';
 // memo() ensures this column doesn't re-render 
 // unless 'column' or 'columnTasks' changes referentially.
 export const Column = memo(({ column, columnTasks, moveTask }: { column: ColumnType; columnTasks: Task[]; moveTask: (taskId: string, sourceColId: string, destColId: string, index: number) => void }) => {
 
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        const taskId = e.dataTransfer.getData("taskId");
-        const sourceColId = e.dataTransfer.getData("sourceColId")
-        const cardElements = Array.from(e.currentTarget.querySelectorAll('.kanban-card'));
-        // 2. Find the index of the first card whose middle is below the mouse
-        const dropIndex = cardElements.findIndex(el => {
-            const rect = el.getBoundingClientRect();
-            console.log("rect", rect)
-            const midPoint = rect.top + rect.height / 2;
-            console.log(midPoint, "midpoint")
-            return e.clientY < midPoint;
-        });
-        // 3. If no cards are below, it goes to the end (-1 becomes length)
-        const finalIndex = dropIndex === -1 ? columnTasks.length : dropIndex;
-
-        moveTask(taskId, sourceColId, column.id, finalIndex);
-    };
-
     return (
         <div
             onDragOver={(e) => e.preventDefault()}
-            onDrop={handleDrop}
+            onDrop={(e) => handleColumnDrop(e, column.id, columnTasks.length, moveTask)}
             className="bg-gray-100 p-4 rounded-lg w-72">
             <h2 className="font-bold mb-4">{column.title}</h2>
             {columnTasks.map((task, idx) => (
