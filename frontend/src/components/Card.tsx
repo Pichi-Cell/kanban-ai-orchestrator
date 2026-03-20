@@ -12,7 +12,7 @@ export const Card = memo(({ task, index, columnId }: { task: Task, index: number
         </div>
     );
 }, (prevProps, nextProps) => {
-    // Only re-render if the taskIds have actually changed length or order
+    // Only re-render if the taskIds have actually changed 
     return (
         prevProps.task === nextProps.task &&
         prevProps.index === nextProps.index &&

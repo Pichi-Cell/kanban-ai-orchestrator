@@ -2,8 +2,7 @@ import { memo } from 'react';
 import { Card } from './Card';
 import { Task, Column as ColumnType } from '../types/kanban';
 import { handleColumnDrop } from '../utils/boardHandlers';
-// memo() ensures this column doesn't re-render 
-// unless 'column' or 'columnTasks' changes referentially.
+
 export const Column = memo(({ column, columnTasks, moveTask }: { column: ColumnType; columnTasks: Task[]; moveTask: (taskId: string, sourceColId: string, destColId: string, index: number) => void }) => {
 
     return (
@@ -18,7 +17,7 @@ export const Column = memo(({ column, columnTasks, moveTask }: { column: ColumnT
         </div>
     );
 }, (prevProps, nextProps) => {
-    // Only re-render if the taskIds have actually changed length or order
+    // Only re-render if the taskIds have actually changed
     return (
         prevProps.column.taskIds === nextProps.column.taskIds &&
         prevProps.column.title === nextProps.column.title

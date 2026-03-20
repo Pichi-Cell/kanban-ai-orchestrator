@@ -14,4 +14,7 @@ export interface BoardData {
     tasks: Record<string, Task>;
     columns: Record<string, Column>;
     columnOrder: string[];
+    boardId: number;
+    boardName: string;
 }
+

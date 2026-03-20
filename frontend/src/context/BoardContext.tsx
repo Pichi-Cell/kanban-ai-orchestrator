@@ -9,49 +9,41 @@ interface BoardContextType extends BoardData {
 
 const BoardContext = createContext<BoardContextType | undefined>(undefined);
 
-export const BoardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-
-    const [data, setData] = useState<BoardData>({
-        tasks: {
-            'task-1': { id: 'task-1', content: 'Design Glassmorphism UI' },
-            'task-2': { id: 'task-2', content: 'Setup Vite + Tailw213123123ind' },
-            'task-3': { id: 'task-3', content: 'Setup Vite + Tailwind' },
-        },
-        columns: {
-            'col-1': { id: 'col-1', title: 'Backlog', taskIds: ['task-1', 'task-2', 'task-3'] },
-            'col-2': { id: 'col-2', title: 'To Do', taskIds: [] },
-            'col-3': { id: 'col-3', title: 'In progress', taskIds: [] },
-            'col-4': { id: 'col-4', title: 'Awaiting Review', taskIds: [] },
-            'col-5': { id: 'col-5', title: 'Done', taskIds: [] },
-        },
-        columnOrder: ['col-1', 'col-2', 'col-3', 'col-4', 'col-5'],
-    });
+export const BoardProvider: React.FC<{
+    initialData: BoardData,
+    onSave: (data: BoardData) => void,
+    children: React.ReactNode
+}> = ({ initialData, onSave, children }) => {
+    const [data, setData] = useState<BoardData>(initialData);
 
     const updateTask = useCallback((taskId: string, newContent: string) => {
-        setData(prev => ({
-            ...prev,
+        // 1. Calculate the next state outside of the setter
+        const nextState = {
+            ...data,
             tasks: {
-                ...prev.tasks,
-                [taskId]: { ...prev.tasks[taskId], content: newContent }
+                ...data.tasks,
+                [taskId]: { ...data.tasks[taskId], content: newContent }
             }
-        }));
-    }, []);
+        };
 
-    // 2. Move Task (Handles Reordering & Column Switching)
+        // 2. Commit to both local and parent
+        setData(nextState);
+        onSave(nextState);
+    }, [data, onSave]);
+
+
+
     const moveTask = useCallback((taskId: string, sourceId: string, destId: string, index: number) => {
+
         setData(prev => {
             const sourceCol = prev.columns[sourceId];
             const destCol = prev.columns[destId];
-
-            // Remove from source
             const newTaskIdsSource = Array.from(sourceCol.taskIds);
-            newTaskIdsSource.splice(newTaskIdsSource.indexOf(taskId), 1);
-
-            // Add to destination
+            const taskIndex = newTaskIdsSource.indexOf(taskId);
+            if (taskIndex !== -1) newTaskIdsSource.splice(taskIndex, 1);
             const newTaskIdsDest = sourceId === destId ? newTaskIdsSource : Array.from(destCol.taskIds);
             newTaskIdsDest.splice(index, 0, taskId);
-
-            return {
+            const nextState = {
                 ...prev,
                 columns: {
                     ...prev.columns,
@@ -59,12 +51,12 @@ export const BoardProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     [destId]: { ...destCol, taskIds: newTaskIdsDest },
                 }
             };
-        });
-    }, []);
 
-    // --- Memoize Value ---
-    // This prevents the Provider from triggering re-renders 
-    // unless the underlying 'data' actually changes.
+            onSave(nextState);
+            return nextState;
+        });
+    }, [onSave]);
+
     const value = useMemo(() => ({
         ...data,
         moveTask,
