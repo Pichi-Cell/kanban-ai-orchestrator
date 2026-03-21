@@ -4,7 +4,6 @@ import { Task, Column as ColumnType } from '../types/kanban';
 import { handleColumnDrop } from '../utils/boardHandlers';
 
 export const Column = memo(({ column, columnTasks, moveTask }: { column: ColumnType; columnTasks: Task[]; moveTask: (taskId: string, sourceColId: string, destColId: string, index: number) => void }) => {
-
     return (
         <div
             onDragOver={(e) => e.preventDefault()}
