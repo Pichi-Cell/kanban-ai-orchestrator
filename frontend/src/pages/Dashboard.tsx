@@ -83,7 +83,7 @@ export const Dashboard = () => {
     <div>
       <nav>
         {allBoards.map(b => (
-          <button onClick={() => setActiveId(b.boardId)}>{b.boardName}</button>
+          <button key={b.boardId} onClick={() => setActiveId(b.boardId)}>{b.boardName}</button>
         ))}
       </nav>
 

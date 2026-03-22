@@ -1,5 +1,7 @@
 The React Development Constitution
 
+NO USE EFFECT!!! NO DEPENDENCY ARRAYS!!!    
+
 Core Philosophy: Performance through Purity. Simplicity through Native APIs.
 1. State Management & Data Architecture
 

@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
-import { BoardData } from '../types/kanban';
+import React, { createContext, useContext, useState, useCallback, useMemo, useRef } from 'react';
+import { BoardData, Task } from '../types/kanban';
 
 interface BoardContextType extends BoardData {
     moveTask: (taskId: string, sourceColId: string, destColId: string, index: number) => void;
-    updateTask: (taskId: string, newContent: string) => void;
+    updateTask: (updatedTask: Task) => void;
 }
 
 
@@ -15,46 +15,49 @@ export const BoardProvider: React.FC<{
     children: React.ReactNode
 }> = ({ initialData, onSave, children }) => {
     const [data, setData] = useState<BoardData>(initialData);
+    const dataRef = useRef(data);
+    dataRef.current = data;
 
-    const updateTask = useCallback((taskId: string, newContent: string) => {
-        // 1. Calculate the next state outside of the setter
+    const updateTask = useCallback((updatedTask: Task) => {
+        const prev = dataRef.current;
         const nextState = {
-            ...data,
+            ...prev,
             tasks: {
-                ...data.tasks,
-                [taskId]: { ...data.tasks[taskId], content: newContent }
+                ...prev.tasks,
+                [updatedTask.id]: updatedTask
             }
         };
 
-        // 2. Commit to both local and parent
         setData(nextState);
         onSave(nextState);
-    }, [data, onSave]);
+
+    }, [onSave]);
 
 
 
     const moveTask = useCallback((taskId: string, sourceId: string, destId: string, index: number) => {
+        const prev = dataRef.current;
+        const sourceCol = prev.columns[sourceId];
+        const destCol = prev.columns[destId];
 
-        setData(prev => {
-            const sourceCol = prev.columns[sourceId];
-            const destCol = prev.columns[destId];
-            const newTaskIdsSource = Array.from(sourceCol.taskIds);
-            const taskIndex = newTaskIdsSource.indexOf(taskId);
-            if (taskIndex !== -1) newTaskIdsSource.splice(taskIndex, 1);
-            const newTaskIdsDest = sourceId === destId ? newTaskIdsSource : Array.from(destCol.taskIds);
-            newTaskIdsDest.splice(index, 0, taskId);
-            const nextState = {
-                ...prev,
-                columns: {
-                    ...prev.columns,
-                    [sourceId]: { ...sourceCol, taskIds: newTaskIdsSource },
-                    [destId]: { ...destCol, taskIds: newTaskIdsDest },
-                }
-            };
+        const newTaskIdsSource = Array.from(sourceCol.taskIds);
+        const taskIndex = newTaskIdsSource.indexOf(taskId);
+        if (taskIndex !== -1) newTaskIdsSource.splice(taskIndex, 1);
 
-            onSave(nextState);
-            return nextState;
-        });
+        const newTaskIdsDest = sourceId === destId ? newTaskIdsSource : Array.from(destCol.taskIds);
+        newTaskIdsDest.splice(index, 0, taskId);
+
+        const nextState = {
+            ...prev,
+            columns: {
+                ...prev.columns,
+                [sourceId]: { ...sourceCol, taskIds: newTaskIdsSource },
+                [destId]: { ...destCol, taskIds: newTaskIdsDest },
+            }
+        };
+
+        setData(nextState);
+        onSave(nextState);
     }, [onSave]);
 
     const value = useMemo(() => ({

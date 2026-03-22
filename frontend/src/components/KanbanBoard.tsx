@@ -2,7 +2,7 @@ import { useBoard } from "../context/BoardContext";
 import { Column } from "./Column";
 
 export const KanbanBoard = () => {
-    const { columns, tasks, columnOrder, moveTask } = useBoard();
+    const { columns, tasks, columnOrder, moveTask, updateTask } = useBoard();
 
     return (
         <div className="flex gap-4 p-4">
@@ -15,6 +15,7 @@ export const KanbanBoard = () => {
                         key={id}
                         column={columns[id]}
                         columnTasks={columns[id].taskIds.map(tid => tasks[tid])}
+                        updateTask={updateTask}
                     />
                 ))
             )}

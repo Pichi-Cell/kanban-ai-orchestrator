@@ -1,14 +1,21 @@
 import { memo } from 'react';
 import { Task } from '../types/kanban';
 import { handleCardDragStart } from '../utils/boardHandlers';
+import { useState } from 'react';
+import TaskMenu from './TaskMenu';
 
-export const Card = memo(({ task, index, columnId }: { task: Task, index: number, columnId: string }) => {
+export const Card = memo(({ task, index, columnId, updateTask }: { task: Task, index: number, columnId: string, updateTask: (updatedTask: Task) => void }) => {
+    const [editingTask, setEditingTask] = useState<Boolean>(false);
+
     return (
         <div
             draggable="true"
             onDragStart={(e) => handleCardDragStart(e, task.id, index, columnId)}
-            className="bg-white p-3 mb-2 rounded shadow-sm kanban-card">
+            className="bg-white p-3 mb-2 rounded shadow-sm kanban-card"
+            onClick={() => setEditingTask(true)}
+        >
             {task.content}
+            {editingTask && <TaskMenu task={task} onClose={() => setEditingTask(false)} onUpdateTask={updateTask} />}
         </div>
     );
 }, (prevProps, nextProps) => {
