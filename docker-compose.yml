@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: kanban_pg
+    environment:
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secretpassword}
+      POSTGRES_DB: ${DB_NAME:-kanbandb}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/init.sql
+
+  backend:
+    image: ghcr.io/pichi-cell/kanban-ai-orchestrator-backend:latest
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kanban_backend
+    ports:
+      - "${PORT:-3001}:3001"
+    environment:
+      - PORT=3001
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-admin}
+      - DB_PASSWORD=${DB_PASSWORD:-secretpassword}
+      - DB_NAME=${DB_NAME:-kanbandb}
+      - JWT_SECRET=${JWT_SECRET:-supersecretjwtkey}
+    depends_on:
+      - db
+
+  frontend:
+    image: ghcr.io/pichi-cell/kanban-ai-orchestrator-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kanban_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      # Vite forwards requests using variables. You might need to update frontend code to use this if needed, 
+      # but generally local host works fine when the browser connects to the backend port directly.
+    depends_on:
+      - backend
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 300
+    environment:
+      - WATCHTOWER_CLEANUP=true
+
+volumes:
+  pgdata:
