@@ -43,8 +43,7 @@ services:
       - "5173:5173"
     environment:
       - NODE_ENV=development
-      # Vite forwards requests using variables. You might need to update frontend code to use this if needed, 
-      # but generally local host works fine when the browser connects to the backend port directly.
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:3001}
     depends_on:
       - backend
 
